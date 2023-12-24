@@ -1,20 +1,24 @@
+import Pagination from '@/app/ui/invoices/pagination';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/customers/table';
 import { lusitana } from '@/app/ui/fonts';
 import { Suspense } from 'react';
-
+import { fetchCustomersPages } from '@/app/lib/data';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Customers',
 };
 
-export default function Page({
+export default async function Page({
   searchParams,
 }: {
-  searchParams?: { query?: string };
+  searchParams?: { query?: string; page?: string };
 }) {
   const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
+
+  const totalPages = await fetchCustomersPages(query);
 
   return (
     <div className="w-full">
@@ -25,8 +29,11 @@ export default function Page({
         <Search placeholder="Search customers..." />
       </div>
       <Suspense fallback={<></>}>
-        <Table query={query} />
+        <Table query={query} currentPage={currentPage} />
       </Suspense>
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
+      </div>
     </div>
   );
 }
